@@ -33,6 +33,8 @@ def kruskal(graph):
 
     mst = []
 
+    # list of edges
+
     usedEdges = set()
 
     for key in graph:
@@ -43,7 +45,7 @@ def kruskal(graph):
 
     sortedGraph.sort(key=lambda x: x[0])
 
-    # dict of "ids" too quickly find if cycle
+    # dict of "ids" too quickly find if cycle - quick find algorithm
     dsu = {}
     counter = 0
     for key in graph:
@@ -68,7 +70,7 @@ def kruskal(graph):
 
 if __name__ == "__main__":
     # weighted undirected graph
-    # Each vertex has edge list w/ (weight, vertex)
+    # Each vertex SHOULD BE edge list w/ (weight, vertex) => messed up
     tempGraph = {
         "a": [("d", 3), ("c", 3), ("b", 2)],
         "b": [("a", 2), ("c", 4), ("e", 3)],
@@ -79,7 +81,7 @@ if __name__ == "__main__":
         "g": [("f", 9)]
     }
 
-    # for prims
+    # to fix for prims => heapsort
     tempGraphFixed = {}
 
     for key in tempGraph:
