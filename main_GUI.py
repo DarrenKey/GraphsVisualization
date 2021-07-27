@@ -1,16 +1,94 @@
+import time
+import heapq
 import math
 import Prims_And_Kruskals
 import tkinter
 
 main = tkinter.Tk()
+main.title("Graphs Visualization")
+main.resizable(False, False)
 
-width, height = 1024, 768
+width, height = 960, 720
 
 canvas = tkinter.Canvas(main, width=width, height=height)
-canvas.pack()
+canvas.grid(row=2, column=0, columnspan=3)
+
+# list of pending after methods
+afterList = []
 
 # dict of edges to remove and edit
+canvasEdgesDict = {}
 
+mst = []
+
+count = 0
+
+# kruskals
+
+
+def one_turn_kruskal(dsu, sortedGraph, viewTime):
+    global count
+    print(count, "coount")
+    edge = sortedGraph[count]
+
+    length, first, second = edge
+
+    arc = canvasEdgesDict[(edge[1], edge[2])]
+
+    canvas.itemconfig(arc, outline="gold")
+    print(edge, viewTime, arc)
+
+    if dsu[first] != dsu[second]:
+        idToChange = dsu[second]
+        idToBe = dsu[first]
+        for key in dsu:
+            if dsu[key] == idToChange:
+                dsu[key] = idToBe
+        mst.append(edge)
+    else:
+        returnCanvas = canvas.after(viewTime,
+                                    lambda: canvas.itemconfig(arc, outline="white"))
+
+        afterList.append(returnCanvas)
+
+    count += 1
+
+
+def kruskal(graph, viewTime):
+
+    sortedGraph = []
+
+    # list of edges
+
+    usedEdges = set()
+
+    for key in graph:
+        for edge in graph[key]:
+            if (edge[1], key) not in usedEdges and (key, edge[1]) not in usedEdges:
+                usedEdges.add((edge[1], edge[2]))
+                sortedGraph.append(edge)
+
+    sortedGraph.sort(key=lambda x: x[0])
+
+    # dict of "ids" too quickly find if cycle - quick find algorithm
+    dsu = {}
+    counter = 0
+    for key in graph:
+        dsu[key] = counter
+        counter += 1
+
+    print(sortedGraph)
+
+    # iterate through sorted graph
+    counter = 0
+    for edge in sortedGraph:
+
+        moveCanvas = canvas.after(viewTime * counter,
+                                  lambda: one_turn_kruskal(dsu, sortedGraph, viewTime))
+
+        afterList.append(moveCanvas)
+
+        counter += 1
 
 # return list of edges from Adjacency list
 
@@ -67,6 +145,7 @@ def create_basic_graph(graph):
 
     # creating the edges
     edgeList = edge_list(graph)
+    print(edgeList)
     for edge in edgeList:
         x0, y0, r0 = coordDict[edge[1]]
         x1, y1, r1 = coordDict[edge[2]]
@@ -75,11 +154,50 @@ def create_basic_graph(graph):
             medianX - x0) * math.sqrt(3)/3
         bigR = abs(medianX - x0) * math.sqrt(3)/3 * 2
 
-        canvas.create_arc(centerCircleX - bigR, centerCircleY - bigR,
-                          centerCircleX + bigR, centerCircleY + bigR, start=210, extent=120, style=tkinter.ARC)
+        arc = canvas.create_arc(centerCircleX - bigR, centerCircleY - bigR,
+                                centerCircleX + bigR, centerCircleY + bigR, start=210, extent=120, style=tkinter.ARC, tag=str((edge[1], edge[2])))
 
-        canvas.create_text(centerCircleX, centerCircleY +
-                           bigR, text=str(edge[0]), fill="turquoise1")
+        text = canvas.create_text(centerCircleX, centerCircleY +
+                                  bigR, text=str(edge[0]), fill="turquoise1")
+
+        canvasEdgesDict[(edge[1], edge[2])] = arc
+
+
+def clear_canvas():
+    for method in afterList:
+        main.after_cancel(method)
+    for key in canvasEdgesDict:
+        arc = canvasEdgesDict[key]
+        canvas.itemconfig(arc, outline="white")
+
+
+def run_kruskal(viewTimeEntry):
+    global count
+
+    viewTime = int(float(viewTimeEntry.get()) * 1000)
+    count = 0
+    clear_canvas()
+    kruskal(tempGraphFixed, viewTime)
+
+
+def create_basic_layout():
+    viewTimeText = tkinter.Label(
+        main, text="Enter how long each step should take (seconds):")
+    viewTimeText.grid(row=0)
+
+    viewTimeEntry = tkinter.Entry(main, width=50)
+    viewTimeEntry.grid(row=0, column=1, columnspan=2)
+
+    primsButton = tkinter.Button(
+        main, text="Run Prims")
+    kruskalButton = tkinter.Button(
+        main, text="Run Kruskal", command=lambda: run_kruskal(viewTimeEntry))
+    clearCanvasButton = tkinter.Button(
+        main, text="Clear", command=clear_canvas)
+
+    primsButton.grid(row=1, column=0)
+    kruskalButton.grid(row=1, column=1)
+    clearCanvasButton.grid(row=1, column=2)
 
 
 if __name__ == "__main__":
@@ -103,6 +221,7 @@ if __name__ == "__main__":
         for edge in tempGraph[key]:
             tempGraphFixed[key].append((edge[1], edge[0], key))
 
+    create_basic_layout()
     create_basic_graph(tempGraphFixed)
 
 tkinter.mainloop()
