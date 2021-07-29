@@ -1,3 +1,6 @@
+# -----------
+# Non-graphical representation of prims and kruskals
+
 import heapq
 
 # implementation of prims
