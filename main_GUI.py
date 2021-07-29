@@ -10,7 +10,7 @@ main.resizable(False, False)
 width, height = 960, 720
 
 canvas = tkinter.Canvas(main, width=width, height=height)
-canvas.grid(row=2, column=0, columnspan=3)
+canvas.grid(row=3, column=0, columnspan=3)
 
 # node clicked to add arc
 nodeClicked = False
@@ -62,61 +62,67 @@ def getValue(nodeName, secondNodeName):
 
 
 # one pass of heappush
-def heappush_kruskal(counter, limit, edgeList, priorityQueue, viewTime):
+def heappush_prims(counter, limit, edgeList, priorityQueue, viewTime, visited):
     if counter < limit:
 
         edge = edgeList[counter]
-        heapq.heappush(priorityQueue, edge)
-        if (edge[1], edge[2]) in canvasEdgesDict:
-            arc, text, isArc = canvasEdgesDict[(edge[1], edge[2])]
-            if isArc:
-                if canvas.itemcget(arc, "outline") == "purple1":
-                    changedArc = main.after(viewTime,
-                                            lambda: canvas.itemconfig(arc, outline="purple1"))
-                    afterList.append(changedArc)
-                else:
-                    changedArc = main.after(viewTime,
-                                            lambda: canvas.itemconfig(arc, outline="white"))
-                    afterList.append(changedArc)
-                canvas.itemconfig(arc, outline="gold")
-            else:
-                if canvas.itemcget(arc, "fill") == "purple1":
-                    changedArc = main.after(viewTime,
-                                            lambda: canvas.itemconfig(arc, fill="purple1"))
-                    afterList.append(changedArc)
-                else:
-                    changedArc = main.after(viewTime,
-                                            lambda: canvas.itemconfig(arc, fill="white"))
-                    afterList.append(changedArc)
-                canvas.itemconfig(arc, fill="gold")
-        elif (edge[2], edge[1]) in canvasEdgesDict:
-            arc, text, isArc = canvasEdgesDict[(edge[2], edge[1])]
 
-            if isArc:
-                if canvas.itemcget(arc, "outline") == "purple1":
-                    changedArc = main.after(viewTime,
-                                            lambda: canvas.itemconfig(arc, outline="purple1"))
-                    afterList.append(changedArc)
+        if not (edge[1] in visited and edge[2] in visited):
+            heapq.heappush(priorityQueue, edge)
+            if (edge[1], edge[2]) in canvasEdgesDict:
+                arc, text, isArc = canvasEdgesDict[(edge[1], edge[2])]
+                if isArc:
+                    if canvas.itemcget(arc, "outline") == "purple1":
+                        changedArc = main.after(viewTime,
+                                                lambda: canvas.itemconfig(arc, outline="purple1"))
+                        afterList.append(changedArc)
+                    else:
+                        changedArc = main.after(viewTime,
+                                                lambda: canvas.itemconfig(arc, outline="white"))
+                        afterList.append(changedArc)
+                    canvas.itemconfig(arc, outline="gold")
                 else:
-                    changedArc = main.after(viewTime,
-                                            lambda: canvas.itemconfig(arc, outline="white"))
-                    afterList.append(changedArc)
-                canvas.itemconfig(arc, outline="gold")
+                    if canvas.itemcget(arc, "fill") == "purple1":
+                        changedArc = main.after(viewTime,
+                                                lambda: canvas.itemconfig(arc, fill="purple1"))
+                        afterList.append(changedArc)
+                    else:
+                        changedArc = main.after(viewTime,
+                                                lambda: canvas.itemconfig(arc, fill="white"))
+                        afterList.append(changedArc)
+                    canvas.itemconfig(arc, fill="gold")
+            elif (edge[2], edge[1]) in canvasEdgesDict:
+                arc, text, isArc = canvasEdgesDict[(edge[2], edge[1])]
 
-            else:
-                if canvas.itemcget(arc, "fill") == "purple1":
-                    changedArc = main.after(viewTime,
-                                            lambda: canvas.itemconfig(arc, fill="purple1"))
-                    afterList.append(changedArc)
+                if isArc:
+                    if canvas.itemcget(arc, "outline") == "purple1":
+                        changedArc = main.after(viewTime,
+                                                lambda: canvas.itemconfig(arc, outline="purple1"))
+                        afterList.append(changedArc)
+                    else:
+                        changedArc = main.after(viewTime,
+                                                lambda: canvas.itemconfig(arc, outline="white"))
+                        afterList.append(changedArc)
+                    canvas.itemconfig(arc, outline="gold")
+
                 else:
-                    changedArc = main.after(viewTime,
-                                            lambda: canvas.itemconfig(arc, fill="white"))
-                    afterList.append(changedArc)
-                canvas.itemconfig(arc, fill="gold")
+                    if canvas.itemcget(arc, "fill") == "purple1":
+                        changedArc = main.after(viewTime,
+                                                lambda: canvas.itemconfig(arc, fill="purple1"))
+                        afterList.append(changedArc)
+                    else:
+                        changedArc = main.after(viewTime,
+                                                lambda: canvas.itemconfig(arc, fill="white"))
+                        afterList.append(changedArc)
+                    canvas.itemconfig(arc, fill="gold")
 
-        heappushKruskal = main.after(viewTime, lambda: heappush_kruskal(
-            counter + 1, limit, edgeList, priorityQueue, viewTime))
-        afterList.append(heappushKruskal)
+            heapPushPrims = main.after(viewTime, lambda: heappush_prims(
+                counter + 1, limit, edgeList, priorityQueue, viewTime, visited))
+            afterList.append(heapPushPrims)
+
+        else:
+            heappush_prims(
+                counter + 1, limit, edgeList, priorityQueue, viewTime, visited)
 
 # implementation of prims
 
@@ -124,20 +130,33 @@ def heappush_kruskal(counter, limit, edgeList, priorityQueue, viewTime):
 def one_turn_prims(graph, visited, priorityQueue, viewTime):
     leastNum = heapq.heappop(priorityQueue)
     numEdges = 0
+
+    # color lowest edge - current edge being processed
+    if (leastNum[1], leastNum[2]) in canvasEdgesDict:
+        arc, text, isArc = canvasEdgesDict[(leastNum[1], leastNum[2])]
+        if isArc:
+            previousColor = canvas.itemcget(arc, "outline")
+            canvas.itemconfig(arc, outline="firebrick3")
+        else:
+            previousColor = canvas.itemcget(arc, "fill")
+            canvas.itemconfig(arc, fill="firebrick3")
+    elif (leastNum[2], leastNum[1]) in canvasEdgesDict:
+        arc, text, isArc = canvasEdgesDict[(leastNum[2], leastNum[1])]
+        if isArc:
+            canvas.itemconfig(arc, outline="firebrick3")
+            previousColor = canvas.itemcget(arc, "outline")
+        else:
+            canvas.itemconfig(arc, fill="firebrick3")
+            previousColor = canvas.itemcget(arc, "fill")
+
     if leastNum[1] not in visited:
         # color edge that is part of dst
-        if (leastNum[1], leastNum[2]) in canvasEdgesDict:
-            arc, text, isArc = canvasEdgesDict[(leastNum[1], leastNum[2])]
-            if isArc:
-                canvas.itemconfig(arc, outline="purple1")
-            else:
-                canvas.itemconfig(arc, fill="purple1")
-        elif (leastNum[2], leastNum[1]) in canvasEdgesDict:
-            arc, text, isArc = canvasEdgesDict[(leastNum[2], leastNum[1])]
-            if isArc:
-                canvas.itemconfig(arc, outline="purple1")
-            else:
-                canvas.itemconfig(arc, fill="purple1")
+        if isArc:
+            canvas.itemconfig(arc, outline="purple1")
+        else:
+            canvas.itemconfig(arc, fill="purple1")
+
+        previousColor = "purple1"
 
         mst.append(leastNum)
 
@@ -145,21 +164,29 @@ def one_turn_prims(graph, visited, priorityQueue, viewTime):
         canvas.itemconfig(nodeCircle, outline="RoyalBlue1")
 
         numEdges = len(graph[leastNum[1]])
-        heappushKruskal = main.after(viewTime,
-                                     lambda: heappush_kruskal(0, numEdges, graph[leastNum[1]], priorityQueue, viewTime))
+        heapPushPrims = main.after(viewTime,
+                                   lambda: heappush_prims(0, numEdges, graph[leastNum[1]], priorityQueue, viewTime, visited))
         changeColor = main.after(viewTime * (numEdges + 1),
                                  lambda: canvas.itemconfig(nodeCircle, outline="white"))
 
-        afterList.append(heappushKruskal)
+        afterList.append(heapPushPrims)
         afterList.append(changeColor)
 
         visited.add(leastNum[1])
 
     if priorityQueue:
+        if isArc:
+            revertColor = main.after(
+                viewTime * (numEdges + 1), lambda: canvas.itemconfig(arc, outline=previousColor))
+        else:
+            revertColor = main.after(
+                viewTime * (numEdges + 1), lambda: canvas.itemconfig(arc, fill=previousColor))
+
         nextTurn = main.after(viewTime * (numEdges + 1), lambda: one_turn_prims(
             graph, visited, priorityQueue, viewTime))
 
         afterList.append(nextTurn)
+        afterList.append(revertColor)
 
 
 # prims
@@ -181,9 +208,10 @@ def prims(graph, viewTime):
 
     numEdges = len(graph[initialNode])
 
-    heappush_kruskal(0, numEdges, graph[initialNode], priorityQueue, viewTime)
+    heappush_prims(0, numEdges, graph[initialNode],
+                   priorityQueue, viewTime, visited)
 
-    starting = main.after(viewTime * (numEdges),
+    starting = main.after(viewTime * (numEdges + 1),
                           lambda: one_turn_prims(graph, visited, priorityQueue, viewTime))
 
     recolorNode = main.after(viewTime * (numEdges),
@@ -203,6 +231,8 @@ def one_turn_kruskal(dsu, sortedGraph, viewTime):
         arc, text, isArc = canvasEdgesDict[(edge[1], edge[2])]
     elif (edge[2], edge[1]) in canvasEdgesDict:
         arc, text, isArc = canvasEdgesDict[(edge[2], edge[1])]
+    else:
+        print(canvasEdgesDict, edge, sortedGraph)
 
     if isArc:
         canvas.itemconfig(arc, outline="gold")
@@ -216,6 +246,12 @@ def one_turn_kruskal(dsu, sortedGraph, viewTime):
             if dsu[key] == idToChange:
                 dsu[key] = idToBe
         mst.append(edge)
+        if isArc:
+            returnCanvas = main.after(viewTime,
+                                      lambda: canvas.itemconfig(arc, outline="purple1"))
+        else:
+            returnCanvas = main.after(viewTime,
+                                      lambda: canvas.itemconfig(arc, fill="purple1"))
     else:
         if isArc:
             returnCanvas = main.after(viewTime,
@@ -280,6 +316,43 @@ def edge_list(graph):
 
     return edgeList
 
+# remove node
+
+
+def remove_node(event):
+
+    # stop all next events
+    clear_canvas()
+
+    canvas_item_id = event.widget.find_withtag('current')[0]
+
+    nodeName = invsNodeDict[canvas_item_id]
+
+    del invsNodeDict[canvas_item_id]
+
+    canvas.delete(canvas_item_id)
+
+    nodeCircle, tempText = nodeDict[nodeName]
+
+    canvas.delete(nodeCircle)
+    canvas.delete(tempText)
+
+    del tempGraphFixed[nodeName]
+
+    for key in tempGraphFixed:
+        for edgeNum in range(len(tempGraphFixed[key]) - 1, -1, -1):
+            if nodeName in tempGraphFixed[key][edgeNum]:
+                del tempGraphFixed[key][edgeNum]
+
+    for key in list(canvasEdgesDict.keys()):
+        if nodeName in key:
+            arc, text, isArc = canvasEdgesDict[key]
+
+            canvas.delete(arc)
+            canvas.delete(text)
+
+            del canvasEdgesDict[key]
+
 
 def add_node(event):
     global nodeCounter
@@ -308,6 +381,9 @@ def add_node(event):
     invsNodeDict[invsCircle] = str(nodeCounter)
     canvas.tag_bind(invsCircle, "<Button-1>",
                     node_clicked)
+
+    canvas.tag_bind(invsCircle, "<Button-2>",
+                    remove_node)
 
     # for circle manip later
     nodeDict[str(nodeCounter)] = (nodeCircle, tempText)
@@ -353,7 +429,7 @@ def create_basic_graph(graph):
             radius = 10
 
             nodeCircle = canvas.create_oval(widthCoord - radius, heightCoord - radius,
-                                            widthCoord + radius, heightCoord + radius, fill="white")
+                                            widthCoord + radius, heightCoord + radius, fill="black", outline="black")
 
             canvas.tag_bind(nodeCircle, "<Button-1>",
                             add_node)
@@ -396,14 +472,14 @@ def create_basic_graph(graph):
                                     centerCircleX + bigR, centerCircleY + bigR, start=210, extent=120, style=tkinter.ARC, tag=str((edge[1], edge[2])))
 
             text = canvas.create_text(centerCircleX, centerCircleY +
-                                      bigR, text=str(edge[0]), fill="turquoise1")
+                                      bigR, text=str(edge[0]), fill="spring green")
 
             canvasEdgesDict[(edge[1], edge[2])] = (arc, text, True)
         else:
             line = canvas.create_line(x0, y0, x1, y1)
 
             text = canvas.create_text(
-                (x0 + x1)/2, (y0 + y1)/2, text=str(edge[0]), fill="turquoise1")
+                (x0 + x1)/2, (y0 + y1)/2, text=str(edge[0]), fill="spring green")
 
             canvasEdgesDict[(edge[1], edge[2])] = (line, text, False)
 
@@ -417,6 +493,9 @@ def create_basic_graph(graph):
         invsNodeDict[invsCircle] = key
         canvas.tag_bind(invsCircle, "<Button-1>",
                         node_clicked)
+
+        canvas.tag_bind(invsCircle, "<Button-2>",
+                        remove_node)
 
 
 def clear_canvas():
@@ -479,14 +558,14 @@ def add_arc_with_value(value, nodeName, secondNodeName, popup):
         canvas.tag_lower(arc)
 
         text = canvas.create_text(centerCircleX, centerCircleY +
-                                  bigR, text=str(value), fill="turquoise1")
+                                  bigR, text=str(value), fill="spring green")
 
         canvasEdgesDict[(nodeName, secondNodeName)] = (arc, text, True)
     else:
         line = canvas.create_line(x0, y0, x1, y1)
 
         text = canvas.create_text(
-            (x0 + x1)/2, (y0 + y1)/2, text=str(value), fill="turquoise1")
+            (x0 + x1)/2, (y0 + y1)/2, text=str(value), fill="spring green")
 
         canvas.tag_lower(line)
 
@@ -494,7 +573,78 @@ def add_arc_with_value(value, nodeName, secondNodeName, popup):
                         ] = (line, text, False)
 
 
+def check_if_connected():
+    # only needed for prims
+    pass
+
 # add an arc
+
+
+def about_prims():
+
+    popup = tkinter.Toplevel(main)
+
+    popup.title("About Prim's Algorithm")
+
+    popup.resizable(False, False)
+
+    label = tkinter.Label(popup, text='''Prim's algorithm only works for connected graphs.
+    (i.e, there exists a path between any two nodes.)
+    
+    Prim's algorithm works by visitng first an arbitrary node, then choosing a the edge
+    with the least value that leads to a new node that has not been visited.
+    
+    The yellow-colored edges are edges being added to the list of nodes to visit,
+    while the purple-colored edges are edges that are part of the minimum spanning tree.
+    The red-colored edges are edges that are being currently processed but cannot be 
+    added to the minimum-spanning tree.
+    Lastly, the blue-colored node is the current node being processed with its
+    neighboring edges added.
+    
+    Prim's algorithm is a little more complicated to visualise here than Kruskal's.''')
+    label.pack()
+
+
+def about_kruskals():
+
+    popup = tkinter.Toplevel(main)
+
+    popup.title("About Kruskal's Algorithm")
+
+    popup.resizable(False, False)
+
+    label = tkinter.Label(popup, text='''Kruskal's algorithm works by first sorting the edges
+    by least weight. Then, for each edge, in order by lowest eight, it adds that
+    edge if it adding it does not form a cycle in the graph.
+    
+    In the representation, the yellow-colored line is the current line being processed,
+    while the purple-colored lines are the lines that are part of the minimum spanning tree.''')
+    label.pack()
+
+
+def how_to_use():
+
+    popup = tkinter.Toplevel(main)
+
+    popup.title("How to use")
+
+    popup.resizable(False, False)
+
+    label = tkinter.Label(popup, text='''This is a simple program designed to visualize
+    Prim's and Kruskal's algorithm for creating minimuim spanning trees.
+    
+    To use, left click on any of the black circles, whcih represent coordinates, to create a node.
+    You can delete nodes by right clicking on them. 
+    
+    Drag a node to another and enter a value to create an edge.
+    
+    Click the Run Prims and Run Kruskal Buttons to start the algorithms.
+    
+    Information on what the colors represent and more about the general algorithm is available with the
+    "About Prim's" and "About Kruskal" Buttons.''')
+    label.pack()
+
+
 def add_arc(event):
     global nodeClicked
 
@@ -502,7 +652,8 @@ def add_arc(event):
     if nodeId:
         if nodeId[0] in invsNodeDict and nodeClicked:
             secondNodeName = invsNodeDict[nodeId[0]]
-            getValue(nodeName, secondNodeName)
+            if nodeName != secondNodeName:
+                getValue(nodeName, secondNodeName)
 
     nodeClicked = False
 
@@ -517,7 +668,7 @@ def create_basic_layout():
     viewTimeEntry.insert(0, "1")
 
     primsButton = tkinter.Button(
-        main, text="Run Prims", command=lambda: run_prims(viewTimeEntry))
+        main, text="Run Prim's", command=lambda: run_prims(viewTimeEntry))
     kruskalButton = tkinter.Button(
         main, text="Run Kruskal", command=lambda: run_kruskal(viewTimeEntry))
     clearCanvasButton = tkinter.Button(
@@ -526,6 +677,17 @@ def create_basic_layout():
     primsButton.grid(row=1, column=0)
     kruskalButton.grid(row=1, column=1)
     clearCanvasButton.grid(row=1, column=2)
+
+    aboutPrims = tkinter.Button(
+        main, text="About Prim's", command=about_prims)
+    aboutKruskal = tkinter.Button(
+        main, text="About Kruskal", command=about_kruskals)
+    howToUse = tkinter.Button(
+        main, text="Clear", command=how_to_use)
+
+    aboutPrims.grid(row=2, column=0)
+    aboutKruskal.grid(row=2, column=1)
+    howToUse.grid(row=2, column=2)
 
 
 if __name__ == "__main__":
