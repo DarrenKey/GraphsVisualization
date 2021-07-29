@@ -39,6 +39,27 @@ nodeCounter = 1
 
 # kruskals
 
+# get new value for adding arc
+
+
+def getValue(nodeName, secondNodeName):
+    popup = tkinter.Toplevel(main)
+
+    popup.title("Enter value of edge")
+
+    popup.resizable(False, False)
+
+    label = tkinter.Label(popup, text="Enter a value for the selected edge:")
+    label.grid(row=0, column=0)
+
+    entry = tkinter.Entry(popup, width=50)
+    entry.grid(row=0, column=1)
+    entry.insert(0, "1")
+
+    button = tkinter.Button(popup, text="Confirm", command=lambda:  add_arc_with_value(
+        int(entry.get()), nodeName, secondNodeName, popup))
+    button.grid(row=1, column=0, columnspan=2)
+
 
 # one pass of heappush
 def heappush_kruskal(counter, limit, edgeList, priorityQueue, viewTime):
@@ -436,6 +457,44 @@ def run_kruskal(viewTimeEntry):
     kruskal(tempGraphFixed, viewTime)
 
 
+# only add arc when get value
+def add_arc_with_value(value, nodeName, secondNodeName, popup):
+    popup.destroy()
+    tempGraphFixed[secondNodeName].append(
+        (value, nodeName, secondNodeName))
+    tempGraphFixed[nodeName].append((value, secondNodeName, nodeName))
+
+    x0, y0, r0 = coordDict[nodeName]
+    x1, y1, r1 = coordDict[secondNodeName]
+
+    if y0 == y1:
+        medianX, medianY = (x0 + x1)/2, (y0 + y1)/2
+        centerCircleX, centerCircleY = medianX, medianY - abs(
+            medianX - x0) * math.sqrt(3)/3
+        bigR = abs(medianX - x0) * math.sqrt(3)/3 * 2
+
+        arc = canvas.create_arc(centerCircleX - bigR, centerCircleY - bigR,
+                                centerCircleX + bigR, centerCircleY + bigR, start=210, extent=120, style=tkinter.ARC, tag=str((nodeName, secondNodeName)))
+
+        canvas.tag_lower(arc)
+
+        text = canvas.create_text(centerCircleX, centerCircleY +
+                                  bigR, text=str(value), fill="turquoise1")
+
+        canvasEdgesDict[(nodeName, secondNodeName)] = (arc, text, True)
+    else:
+        line = canvas.create_line(x0, y0, x1, y1)
+
+        text = canvas.create_text(
+            (x0 + x1)/2, (y0 + y1)/2, text=str(value), fill="turquoise1")
+
+        canvas.tag_lower(line)
+
+        canvasEdgesDict[(nodeName, secondNodeName)
+                        ] = (line, text, False)
+
+
+# add an arc
 def add_arc(event):
     global nodeClicked
 
@@ -443,39 +502,7 @@ def add_arc(event):
     if nodeId:
         if nodeId[0] in invsNodeDict and nodeClicked:
             secondNodeName = invsNodeDict[nodeId[0]]
-            value = 5
-            tempGraphFixed[secondNodeName].append(
-                (value, nodeName, secondNodeName))
-            tempGraphFixed[nodeName].append((value, secondNodeName, nodeName))
-
-            x0, y0, r0 = coordDict[nodeName]
-            x1, y1, r1 = coordDict[secondNodeName]
-
-            if y0 == y1:
-                medianX, medianY = (x0 + x1)/2, (y0 + y1)/2
-                centerCircleX, centerCircleY = medianX, medianY - abs(
-                    medianX - x0) * math.sqrt(3)/3
-                bigR = abs(medianX - x0) * math.sqrt(3)/3 * 2
-
-                arc = canvas.create_arc(centerCircleX - bigR, centerCircleY - bigR,
-                                        centerCircleX + bigR, centerCircleY + bigR, start=210, extent=120, style=tkinter.ARC, tag=str((nodeName, secondNodeName)))
-
-                canvas.tag_lower(arc)
-
-                text = canvas.create_text(centerCircleX, centerCircleY +
-                                          bigR, text=str(value), fill="turquoise1")
-
-                canvasEdgesDict[(nodeName, secondNodeName)] = (arc, text, True)
-            else:
-                line = canvas.create_line(x0, y0, x1, y1)
-
-                text = canvas.create_text(
-                    (x0 + x1)/2, (y0 + y1)/2, text=str(value), fill="turquoise1")
-
-                canvas.tag_lower(line)
-
-                canvasEdgesDict[(nodeName, secondNodeName)
-                                ] = (line, text, False)
+            getValue(nodeName, secondNodeName)
 
     nodeClicked = False
 
