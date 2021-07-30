@@ -163,9 +163,12 @@ def one_turn_prims(graph, visited, priorityQueue, viewTime):
         nodeCircle, nodeText = nodeDict[leastNum[1]]
         canvas.itemconfig(nodeCircle, outline="RoyalBlue1")
 
-        numEdges = len(graph[leastNum[1]])
+        for edge in graph[leastNum[1]]:
+            if not (edge[1] in visited and edge[2] in visited):
+                numEdges += 1
+
         heapPushPrims = main.after(viewTime,
-                                   lambda: heappush_prims(0, numEdges, graph[leastNum[1]], priorityQueue, viewTime, visited))
+                                   lambda: heappush_prims(0, len(graph[leastNum[1]]), graph[leastNum[1]], priorityQueue, viewTime, visited))
         changeColor = main.after(viewTime * (numEdges + 1),
                                  lambda: canvas.itemconfig(nodeCircle, outline="white"))
 
