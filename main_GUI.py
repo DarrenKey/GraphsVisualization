@@ -686,7 +686,7 @@ def create_basic_layout():
     aboutKruskal = tkinter.Button(
         main, text="About Kruskal", command=about_kruskals)
     howToUse = tkinter.Button(
-        main, text="Clear", command=how_to_use)
+        main, text="How to use", command=how_to_use)
 
     aboutPrims.grid(row=2, column=0)
     aboutKruskal.grid(row=2, column=1)
