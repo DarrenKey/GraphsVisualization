@@ -4,13 +4,17 @@ import Prims_And_Kruskals
 import tkinter
 
 main = tkinter.Tk()
+
 main.title("Graphs Visualization")
 main.resizable(False, False)
 
 width, height = 960, 720
 
+main.configure(background="grey")
+
 canvas = tkinter.Canvas(main, width=width, height=height)
 canvas.grid(row=3, column=0, columnspan=3)
+canvas.configure(background="grey")
 
 # node clicked to add arc
 nodeClicked = False
@@ -45,11 +49,14 @@ nodeCounter = 1
 def getValue(nodeName, secondNodeName):
     popup = tkinter.Toplevel(main)
 
+    popup.configure(background="grey")
+
     popup.title("Enter value of edge")
 
     popup.resizable(False, False)
 
-    label = tkinter.Label(popup, text="Enter a value for the selected edge:")
+    label = tkinter.Label(
+        popup, text="Enter a value for the selected edge:", bg="grey")
     label.grid(row=0, column=0)
 
     entry = tkinter.Entry(popup, width=50)
@@ -57,7 +64,7 @@ def getValue(nodeName, secondNodeName):
     entry.insert(0, "1")
 
     button = tkinter.Button(popup, text="Confirm", command=lambda:  add_arc_with_value(
-        int(entry.get()), nodeName, secondNodeName, popup))
+        int(entry.get()), nodeName, secondNodeName, popup), fg="black", highlightbackground="grey")
     button.grid(row=1, column=0, columnspan=2)
 
 
@@ -587,6 +594,8 @@ def about_prims():
 
     popup = tkinter.Toplevel(main)
 
+    popup.configure(background="grey")
+
     popup.title("About Prim's Algorithm")
 
     popup.resizable(False, False)
@@ -604,13 +613,15 @@ def about_prims():
     Lastly, the blue-colored node is the current node being processed with its
     neighboring edges added.
     
-    Prim's algorithm is a little more complicated to visualise here than Kruskal's.''')
+    Prim's algorithm is a little more complicated to visualise here than Kruskal's.''', bg="grey")
     label.pack()
 
 
 def about_kruskals():
 
     popup = tkinter.Toplevel(main)
+
+    popup.configure(background="grey")
 
     popup.title("About Kruskal's Algorithm")
 
@@ -621,7 +632,7 @@ def about_kruskals():
     edge if it adding it does not form a cycle in the graph.
     
     In the representation, the yellow-colored line is the current line being processed,
-    while the purple-colored lines are the lines that are part of the minimum spanning tree.''')
+    while the purple-colored lines are the lines that are part of the minimum spanning tree.''', bg="grey")
     label.pack()
 
 
@@ -630,6 +641,8 @@ def how_to_use():
     popup = tkinter.Toplevel(main)
 
     popup.title("How to use")
+
+    popup.configure(background="grey")
 
     popup.resizable(False, False)
 
@@ -644,7 +657,7 @@ def how_to_use():
     Click the Run Prims and Run Kruskal Buttons to start the algorithms.
     
     Information on what the colors represent and more about the general algorithm is available with the
-    "About Prim's" and "About Kruskal" Buttons.''')
+    "About Prim's" and "About Kruskal" Buttons.''', bg="grey")
     label.pack()
 
 
@@ -663,7 +676,7 @@ def add_arc(event):
 
 def create_basic_layout():
     viewTimeText = tkinter.Label(
-        main, text="Enter how long each step should take (seconds):")
+        main, text="Enter how long each step should take (seconds):", background="grey")
     viewTimeText.grid(row=0)
 
     viewTimeEntry = tkinter.Entry(main, width=50)
@@ -671,22 +684,22 @@ def create_basic_layout():
     viewTimeEntry.insert(0, "1")
 
     primsButton = tkinter.Button(
-        main, text="Run Prim's", command=lambda: run_prims(viewTimeEntry))
+        main, text="Run Prim's", command=lambda: run_prims(viewTimeEntry), fg="black", highlightbackground="grey")
     kruskalButton = tkinter.Button(
-        main, text="Run Kruskal", command=lambda: run_kruskal(viewTimeEntry))
+        main, text="Run Kruskal", command=lambda: run_kruskal(viewTimeEntry), fg="black", highlightbackground="grey")
     clearCanvasButton = tkinter.Button(
-        main, text="Clear", command=clear_canvas)
+        main, text="Clear", command=clear_canvas, fg="black", highlightbackground="grey")
 
     primsButton.grid(row=1, column=0)
     kruskalButton.grid(row=1, column=1)
     clearCanvasButton.grid(row=1, column=2)
 
     aboutPrims = tkinter.Button(
-        main, text="About Prim's", command=about_prims)
+        main, text="About Prim's", command=about_prims, fg="black", highlightbackground="grey")
     aboutKruskal = tkinter.Button(
-        main, text="About Kruskal", command=about_kruskals)
+        main, text="About Kruskal", command=about_kruskals, fg="black", highlightbackground="grey")
     howToUse = tkinter.Button(
-        main, text="How to use", command=how_to_use)
+        main, text="How to use", command=how_to_use, fg="black", highlightbackground="grey")
 
     aboutPrims.grid(row=2, column=0)
     aboutKruskal.grid(row=2, column=1)
